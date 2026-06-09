@@ -15,8 +15,8 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-BASE_URL = "http://localhost:8080/api/car_sales"
-AI_URL   = "http://localhost:8080/api/ai/ask"
+BASE_URL = "https://car-sales-analytics-with-ai-advisor.onrender.com/api/car_sales"
+AI_URL   = "https://car-sales-analytics-with-ai-advisor.onrender.com/api/ai/ask"
 
 # ════════════════════════════════════════════
 #  PREMIUM CSS & ANIMATIONS
@@ -275,36 +275,48 @@ def get_yearly_sales():
     try:
         r = requests.get(f"{BASE_URL}/yearly-count", timeout=10)
         r.raise_for_status()
-        data = r.json()["data"]
+        data = r.json().get("data", [])
+
         if isinstance(data, dict):
             data = [data]
+
         return pd.DataFrame(data)
+
     except Exception as e:
-        return f"API is down : {e}"
+        st.error(f"Yearly API error: {e}")
+        return pd.DataFrame()
 
 @st.cache_data(ttl=300)
 def get_monthly_sales(year: int):
     try:
         r = requests.get(f"{BASE_URL}/monthly-count", params={"year": year}, timeout=10)
         r.raise_for_status()
-        data = r.json()["data"]
+        data = r.json().get("data", [])
+
         if isinstance(data, dict):
             data = [data]
+
         return pd.DataFrame(data)
+
     except Exception as e:
-        return f"API is down : {e}"
+        st.error(f"Monthly API error: {e}")
+        return pd.DataFrame()
     
 @st.cache_data(ttl=300)
 def get_weekly_sales(year: int, month: int):
     try:
-        r = requests.get(f"{BASE_URL}/weekly-count", params={"year": year,"month": month}, timeout=10)
+        r = requests.get(f"{BASE_URL}/weekly-count", params={"year": year, "month": month}, timeout=10)
         r.raise_for_status()
-        data = r.json()["data"]
+        data = r.json().get("data", [])
+
         if isinstance(data, dict):
             data = [data]
+
         return pd.DataFrame(data)
+
     except Exception as e:
-        return f"API is down : {e}"
+        st.error(f"Weekly API error: {e}")
+        return pd.DataFrame()
 
 def ask_ai(question: str):
     try:
